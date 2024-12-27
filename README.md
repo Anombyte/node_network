@@ -14,10 +14,13 @@ This project is a dynamic, reusable Python application that connects AI models (
    ```bash
    git clone https://github.com/yourusername/yourproject.git
    pip install -r requirements.txt
-   python main.py```
+   python main.py
 
 ## **Roadmap**
-ROADMAP.md
+[ROADMAP.md](https://github.com/hbruinsma/node_network/blob/main/ROADMAP.md)
+
+## **Portfolio**
+Explore my coding journey and progress in the [portfolio folder]
 
 ## **Contributions**
 Contributions are welcome! Please refer to the CONTRIBUTING.md (coming soon) for guidelines.
