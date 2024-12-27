@@ -2,14 +2,13 @@ from shared import state
 from shared.logging import logger, log_event, log_error, log_task_event
     
 name = ""
-node_name = ""
-node_target = ""
+purpose = ""
     
 class task:
-    def __init__(self, in_name, in_node_name):
+    def __init__(self, in_name, in_purpose):
         self.name = in_name
-        self.node_name = in_node_name
-        log_task_event(name,f"Created task: {name}")
+        self.purpose = in_purpose
+        log_task_event(name,f"Created node: {name} with the purpose {purpose}")
 
 
 

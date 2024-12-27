@@ -27,3 +27,9 @@ def log_task_event(node_name, message):
     Log a task-specific event.
     """
     logger.info(f"[{node_name}] {message}")
+
+def log_node_event(node_name, message):
+    """
+    Log a node-specific event.
+    """
+    logger.info(f"[{node_name}] {message}")

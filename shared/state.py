@@ -1,6 +1,6 @@
 from threading import RLock
 from tqdm import tqdm
-from shared.logging import logger, log_event, log_error, log_task_event
+from shared.logging import logger, log_event, log_error, log_task_event, log_node_event
 
 # State dictionary and lock for thread-safe access
 state = {
@@ -87,7 +87,7 @@ def update_node_status(node_name, status):
     """
     if node_name in state["nodes"]:
         state["nodes"][node_name]["status"] = status
-        log_event(node_name, f"Status updated to {status}.")
+        log_node_event(node_name, f"Status updated to {status}.")
         update_progress()
 
 
@@ -99,7 +99,7 @@ def increment_completed_tasks():
     state["completed_tasks"] += 1
     state["progress"] = int((state["completed_tasks"] / state["total_tasks"]) * 100)
     progress_bar.update(1)
-    log_event(f"Completed tasks: {state['completed_tasks']}/{state['total_tasks']} | Progress: {state['progress']}%")
+    log_node_event(f"Completed tasks: {state['completed_tasks']}/{state['total_tasks']} | Progress: {state['progress']}%")
 
 #TODO finish fixing text cases (dependencies and one other I forgot)
 #Also need to understand how to create this program programatically from a gpt rather than just pasting code it gives me into this.
@@ -114,8 +114,7 @@ def update_progress():
     state["progress"] = int(
         (state["completed_tasks"] / state["total_tasks"]) * 100
     )
-    log_event(f"Progress updated: {state['progress']}%")
-
+    log_node_event(f"Progress updated: {state['progress']}%")
 
 @thread_safe
 def initialize_node(node_name):
