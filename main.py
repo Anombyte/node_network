@@ -1,7 +1,7 @@
 from tasks.progress_estimation import initialize_progress_bar, finalize_progress_bar, progress_estimation_node
 from shared.state import state
 from shared.parallel_execution import execute_tasks
-from shared.logging import logger, log_event, log_error, log_task_event
+from shared.Logger import logger, log_event, log_error, log_task_event
 
 def main():
     """

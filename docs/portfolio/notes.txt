@@ -5,3 +5,9 @@ Creating the virtual environment:
 Installing Dependencies:
     pip install -r requirements.txt
     git add requirements.txt
+
+Deactivate the virtual environment:
+    deactivate
+
+Re-activate after creating:
+    source env/bin/activate

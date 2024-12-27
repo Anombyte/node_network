@@ -3,7 +3,7 @@ from shared.state import state, update_node_status, update_node_output
 from shared.parallel_execution import execute_in_parallel
 from tasks.task import example_task
 from tasks.progress_estimation import initialize_progress_bar, finalize_progress_bar
-from shared.logging import logger, log_event, log_error, log_task_event
+from shared.Logger import logger, log_event, log_error, log_task_event
 
 
 class TestNodeNetwork(unittest.TestCase):

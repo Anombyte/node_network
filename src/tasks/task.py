@@ -1,5 +1,5 @@
 from shared import state
-from shared.logging import logger, log_event, log_error, log_task_event
+from shared.Logger import logger, log_event, log_error, log_task_event
     
 name = ""
 node_name = ""
