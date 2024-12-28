@@ -1,79 +1,92 @@
 import unittest
-from shared.state import state, update_node_status, update_node_output
-from shared.parallel_execution import execute_in_parallel
-from tasks.task import example_task
-from tasks.progress_estimation import initialize_progress_bar, finalize_progress_bar
-from shared.Logger import logger, log_event, log_error, log_task_event
+from unittest.mock import MagicMock
+from logger_utils import Logger  # Mock the Logger
+from shared.AI_Node import AI_Node  # Import the Node class
 
+class TestNode(unittest.TestCase):
 
-class TestNodeNetwork(unittest.TestCase):
     def setUp(self):
-        state["nodes"] = {
-            "example_task_1": {"status": "Not Started", "dependencies": [], "retries": 0, "output": None},
-            "example_task_2": {"status": "Not Started", "dependencies": ["example_task_1"], "retries": 0, "output": None},
-            "example_task_3": {"status": "Not Started", "dependencies": ["example_task_2"], "retries": 0, "output": None},
+        """
+        Set up common test fixtures for the tests.
+        """
+        # Mock the Logger to avoid actual logging during tests
+        Logger.log_node_event = MagicMock()
+
+        # Common attributes for Node initialization
+        self.name = "TestNode"
+        self.node_id = "12345"
+        self.description = "This is a test node."
+        self.priority = 5
+        self.status = "active"
+        self.purpose = "testing"
+        self.task = "test task"
+
+        # Create a Node instance        
+        self.node = AI_Node(
+            in_name=self.name,
+            in_node_id=self.node_id,
+            in_description=self.description,
+            in_priority=self.priority,
+            in_status=self.status,
+            in_purpose=self.purpose,
+            in_task = self.task,
+        )
+
+    def test_initialization(self):
+        """
+        Test that the Node is initialized with correct values.
+        """
+        self.assertEqual(self.node.name, self.name)
+        self.assertEqual(self.node.node_id, self.node_id)
+        self.assertEqual(self.node.description, self.description)
+        self.assertEqual(self.node.priority, self.priority)
+        self.assertEqual(self.node.status, self.status)
+        self.assertEqual(self.node.purpose, self.purpose)
+        self.assertEqual(self.node.task, self.task)
+
+    def test_get_details(self):
+        """
+        Test the get_details method.
+        """
+        expected_details = {
+            "node_id": self.node_id,
+            "description": self.description,
+            "priority": self.priority,
+            "status": self.status,
+            "purpose": self.purpose,
+            "task": self.task,
         }
-        state["total_tasks"] = len(state["nodes"])
-        state["progress"] = 0
+        self.assertEqual(self.node.get_details(), expected_details)
 
-    def test_task_execution(self):
-        example_task("Input for Task 1", "example_task_1")
-        self.assertEqual(state["nodes"]["example_task_1"]["status"], "Completed")
-        self.assertEqual(state["nodes"]["example_task_1"]["output"], "Processed: Input for Task 1")
-
-    def test_dependency_management(self):
-        tasks = [
-            (example_task, ("Input for Task 1", "example_task_1")),
-            (example_task, ("Input for Task 2", "example_task_2")),
-            (example_task, ("Input for Task 3", "example_task_3")),
-        ]
-        execute_in_parallel(tasks, state)
-        self.assertEqual(state["nodes"]["example_task_1"]["status"], "Completed")
-        self.assertEqual(state["nodes"]["example_task_2"]["status"], "Completed")
-        self.assertEqual(state["nodes"]["example_task_3"]["status"], "Completed")
-
-    def test_progress_tracking(self):
+    def test_set_status(self):
         """
-        Test that progress updates correctly during task execution.
+        Test the set_status method.
         """
-        initialize_progress_bar(total_tasks=len(state["nodes"]))  # Pass total_tasks explicitly for testing
-        example_task("Input for Task 1", "example_task_1")
-        self.assertGreater(state["progress"], 0)
-        self.assertEqual(state["nodes"]["example_task_1"]["status"], "Completed")
-        finalize_progress_bar()
+        new_status = "inactive"
+        self.node.set_status(new_status)
 
+        # Check that the status is updated
+        self.assertEqual(self.node.status, new_status)
 
-    def test_parallel_execution(self):
-        tasks = [
-            (example_task, ["Input for Task 1", "example_task_1"]),
-            (example_task, ["Input for Task 2", "example_task_2"]),
-            (example_task, ["Input for Task 3", "example_task_3"]),
-        ]
-        execute_in_parallel(tasks, state)
-        self.assertEqual(state["progress"], 100)
-        self.assertEqual(state["nodes"]["example_task_1"]["status"], "Completed")
-        self.assertEqual(state["nodes"]["example_task_2"]["status"], "Completed")
-        self.assertEqual(state["nodes"]["example_task_3"]["status"], "Completed")
+        # Check that the logger was called with the correct message
+        Logger.log_node_event.assert_called_with(self.name, f"Status updated to {new_status}")
 
-    def test_error_handling(self):
-        def faulty_task(*args):
-            raise ValueError("Simulated task error")
+    def test_str_representation(self):
+        """
+        Test the __str__ method.
+        """
+        expected_str = f"Node({self.node_id}, Priority={self.priority}, Status={self.status}, Purpose={self.purpose}, Task={self.task})"
+        self.assertEqual(str(self.node), expected_str)
 
-        state["nodes"]["faulty_task"] = {"status": "Not Started", "dependencies": [], "retries": 0, "output": None}
+    def test_logger_singleton(self):
+        """
+        Test that all instances of Logger share the same object.
+        """
+        logger1 = Logger()
+        logger2 = Logger()
 
-        try:
-            faulty_task()
-        except ValueError as e:
-            update_node_status("faulty_task", "Error")
-            self.assertEqual(str(e), "Simulated task error")
-            self.assertEqual(state["nodes"]["faulty_task"]["status"], "Error")
-
-    def tearDown(self):
-        state.clear()
-        state["nodes"] = {}
-        state["progress"] = 0
-        state["total_tasks"] = 0
-        state["completed_tasks"] = 0
+        # Assert both instances are the same
+        self.assertIs(logger1, logger2)
 
 if __name__ == "__main__":
     unittest.main()

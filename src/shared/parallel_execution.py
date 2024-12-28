@@ -1,12 +1,12 @@
 import threading
-from shared.Logger import log_node_event
+from logger_utils import log_node_event
 from shared.state import are_dependencies_completed
 
 import threading
-from shared.Logger import logger, log_event, log_error, log_task_event
+from logger_utils import logger, log_event, log_error, log_task_event
 
 
-from shared.Logger import logger, log_task_event, log_error
+from logger_utils import logger, log_task_event, log_error
 
 def execute_in_parallel(tasks, state):
     logger.info("Starting parallel execution of tasks.")

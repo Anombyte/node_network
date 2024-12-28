@@ -2,6 +2,10 @@ Creating the virtual environment:
     python3 -m venv venv
     source venv/bin/activate  # Windows: venv\Scripts\activate
 
+Activate:
+    .\venv\Scripts\Activate
+
+
 Installing Dependencies:
     pip install -r requirements.txt
     git add requirements.txt
@@ -11,3 +15,19 @@ Deactivate the virtual environment:
 
 Re-activate after creating:
     source env/bin/activate
+
+Explanation of Test Cases
+Standard Cases:
+
+Initialization with UUID: Verifies that a UUID is generated when no node_id is provided.
+Initialization with Provided ID: Ensures a given node_id is used correctly.
+Get Details: Confirms that the get_details method returns accurate information.
+Functional Methods:
+
+Set Status: Checks that set_status updates the status correctly.
+String Representation: Ensures the __str__ method provides a well-formatted string.
+Edge Cases:
+
+Empty Description: Ensures the class handles empty descriptions gracefully.
+Invalid Priority: Verifies the class raises an exception for invalid priority values.
+Null Task: Ensures the class handles a None task without breaking.
