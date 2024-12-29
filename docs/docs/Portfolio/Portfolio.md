@@ -31,21 +31,12 @@ The idea behind Node Network is simple:
 
 ### **Phase 1: Learning the Foundations**
 - **Goal:** Build the foundation of the project by understanding object-oriented programming and creating the first `AI_Node` class.
-- **What I Learned:**
-  - How to design a Python class that adheres to OOP principles.
-  - Writing unit tests to verify functionality.
 
 ### **Phase 2: Experimenting with Collaboration**
 - **Goal:** Develop an orchestrator to manage interactions between nodes and enable task delegation.
-- **What I Learned:**
-  - The importance of modular design for scalability.
-  - Debugging Python errors in collaborative systems.
 
 ### **Phase 3: Scaling and Automating**
 - **Goal:** Integrate CI/CD pipelines and generate professional documentation.
-- **What I Learned:**
-  - Setting up automated workflows with GitHub Actions.
-  - Using MkDocs to create a live documentation site.
 
 ---
 
