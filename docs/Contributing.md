@@ -63,7 +63,7 @@ Push your changes and open a pull request to the main branch. Provide a detailed
 
 ## **Coding Standards**
 Please adhere to the following guidelines:
-1. Python Style: Follow (PEP 8)[https://pep8.org/] for Python code.
+1. Python Style: Follow [PEP 8](https://pep8.org/) for Python code.
 2. Linting: Run ```flake8``` to ensure code quality:
 ```bash
 flake8 .
@@ -72,11 +72,13 @@ flake8 .
 
 ## **Communication**
 If you have questions or need guidance:
-- Open a discussion on the (GitHub Discussions page.)[https://github.com/hbruinsma/node_network/discussions]
+- Open a discussion on the [GitHub Discussions page.](https://github.com/hbruinsma/node_network/discussion)]
 - Tag an existing issue or pull request for clarification.
 
-## **Code of Conduct**
-By participating in this project, you agree to abide by the Code of Conduct. (In Progress)
+## **Code of Conduct (In Progress)**
+By participating in this project, you agree to abide by the Code of Conduct.
+
+---
 
 Thank you for contributing to Node Network!
 
