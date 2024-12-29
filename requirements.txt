@@ -1,3 +1,6 @@
 pytest
 flake8
 tqdm
+openai
+requests
+
