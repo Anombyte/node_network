@@ -1,0 +1,11 @@
+site_name: Node Network Documentation
+site_description: A collaborative AI network with recursive expert nodes
+theme:
+  name: material
+nav:
+  - Overview: index.md
+  - Setup Guide: setup.md
+  - Architecture: architecture.md
+  - Contributing: contributing.md
+  - API Reference: api.md
+  - Portfolio Highlights: portfolio.md

@@ -23,4 +23,4 @@ This project is a dynamic, reusable Python application that connects AI models (
 Explore my coding journey and progress in the [portfolio folder](https://github.com/hbruinsma/node_network/blob/main/portfolio/)
 
 ## **Contributions**
-Contributions are welcome! Please refer to the CONTRIBUTING.md (coming soon) for guidelines.
+Contributions are welcome! Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
