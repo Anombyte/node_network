@@ -4,8 +4,12 @@ theme:
   name: material
 nav:
   - Overview: index.md
-  - Setup Guide: setup.md
-  - Architecture: architecture.md
-  - Contributing: contributing.md
-  - API Reference: api.md
-  - Portfolio Highlights: portfolio.md
+  - Setup Guide: Setup.md
+  - Roadmap: Roadmap.md
+  - Contributing: Contributing.md
+  - Portfolio:
+      - Overview: portfolio/Portfolio.md
+      - AI_Node: portfolio/AI_Node.md
+      - Feedback Model: portfolio/Feedback_Model.md
+      - Orchestrator: portfolio/Orchestrator.md
+      - Final Deployment: portfolio/Final_Deployment.md
