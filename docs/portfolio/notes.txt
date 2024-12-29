@@ -31,3 +31,5 @@ Edge Cases:
 Empty Description: Ensures the class handles empty descriptions gracefully.
 Invalid Priority: Verifies the class raises an exception for invalid priority values.
 Null Task: Ensures the class handles a None task without breaking.
+
+The self keyword is automatically passed to methods in Python, so explicitly passing self as an argument is unnecessary and results in the error you’re seeing.

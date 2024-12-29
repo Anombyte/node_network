@@ -17,7 +17,6 @@ class AI_Node(LoggerMixin):
 
         super().__init__() # Initialize loggers from LoggerMixin which include 'default', 'debugger' and 'error_logger'
 
-        # Default values for readability
         # Assign class attributes
         self.name = in_name
         self.node_id = in_node_id or str(uuid.uuid4())  # Use provided ID or generate a UUID
@@ -25,13 +24,7 @@ class AI_Node(LoggerMixin):
         self.status = in_status
         self.purpose = in_purpose
         self.task = in_task
-
-        # Validate and assign priority
-        if in_priority >= 1:
-            self.priority = in_priority
-        else:
-            self.log_error("Priority must be >= 1")
-            raise ValueError("Priority must be greater than or equal to 1.")
+        self.set_priority(in_priority)
 
     def get_details(self):
         """
@@ -77,6 +70,23 @@ class AI_Node(LoggerMixin):
         return outString
     
     def set_task(self, in_task):
-        self.task = in_task 
+        #TODO validate task is a task that this node can process
+        self.task = in_task
+    
+    def set_priority(self, in_priority):
+        # Validate and assign priority
+        if in_priority >= 1:
+            self.priority = in_priority
+        else:
+            self.log_error("Priority must be >= 1")
+            raise ValueError("Priority must be greater than or equal to 1.")
+        
+    def process_task(self):
+        """
+        Stub for processing the assigned task.
 
-
+        Returns:
+            str: Placeholder result indicating task is processed.
+        """
+        self.log_node_event(f"Processing task for Node {self.name} (ID: {self.node_id})")
+        return "Task processed"

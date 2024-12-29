@@ -154,3 +154,52 @@ def test_edge_case_null_task():
         in_task=None  # Null task
     )
     assert node.task is None
+
+def test_process_task_mock(sample_node):
+    """
+    Test the behavior of the process_task method when mocked.
+    """
+    with patch.object(AI_Node, 'process_task', return_value="Mocked task processed") as mock_method:
+        result = sample_node.process_task()
+
+        # Assertions
+        assert result == "Mocked task processed"
+        mock_method.assert_called_once()  # Ensure the method was called
+
+def test_set_priority():
+    """
+    Test that set_priority logs an error and raises ValueError for invalid priority.
+    Test that set_priority also deals with valid priorities.
+    """
+    with patch.object(AI_Node, 'log_error') as mock_log_error:
+        node = AI_Node(
+            in_name="TestNode",
+            in_node_id=None,
+            in_description="Test Node Description",
+            in_priority=1,
+            in_status="active",
+            in_purpose="Testing",
+            in_task="Task"
+        )
+
+        # Invalid values
+        # Assert that ValueError is raised
+        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+            node.set_priority(-5)  # Invalid priority
+        # Assert that log_error was called with the correct message
+            mock_log_error.assert_called_once_with("Priority must be >= 1")
+        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+            node.set_priority(0)  # Invalid priority
+            mock_log_error.assert_called_once_with("Priority must be >= 1")
+        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+            node.set_priority(-100000000)  # Invalid priority
+            mock_log_error.assert_called_once_with("Priority must be >= 1")
+        
+        # Valid values
+        node.set_priority(10)
+        assert node.priority == 10
+        node.set_priority(1)
+        assert node.priority == 1
+        node.set_priority(100000)
+        assert node.priority == 100000
+
