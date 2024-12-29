@@ -17,11 +17,10 @@ This project is a dynamic, reusable Python application that connects AI models (
    python main.py
 
 ## **Roadmap**
-To view a comprehensive explanation of my goals for this project, and for the future, visit [ROADMAP.md](https://github.com/hbruinsma/node_network/tree/main/docs/portfolio/ROADMAP.md).
-
+To view a comprehensive explanation of my goals for this project, and for the future, visit [Roadmap.md](https://github.com/hbruinsma/node_network/blob/main/docs/docs/Roadmap.md).
 
 ## **Portfolio**
-Explore my coding journey and progress in the [portfolio folder](https://github.com/hbruinsma/node_network/tree/main/docs/portfolio)
+Explore my coding journey and progress in the [Portfolio folder](https://github.com/hbruinsma/node_network/tree/main/docs/docs)
 
 ## **Contributions**
-Contributions are welcome! Please refer to the [CONTRIBUTING.md](https://github.com/hbruinsma/node_network/blob/main/docs/Contributing.md) guide to get started.
+Contributions are welcome! Please refer to the [Contributing.md](https://github.com/hbruinsma/node_network/blob/main/docs/docs/Contributing.md) guide to get started.
