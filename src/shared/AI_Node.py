@@ -50,6 +50,7 @@ class AI_Node(LoggerMixin):
             self.node_id,
             f"Details retrieved...\n Description: {self.description}\n Priority: {self.priority}\n Purpose: {self.purpose} Current Task: {self.task}",
         )
+
         return {
             "node_id": self.node_id,
             "description": self.description,
