@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from logger_manager import Logger  # Mock the Logger
 from shared.AI_Node import AI_Node  # Import the Node class
 
+
 class TestNode(unittest.TestCase):
 
     def setUp(self):
@@ -21,7 +22,7 @@ class TestNode(unittest.TestCase):
         self.purpose = "testing"
         self.task = "test task"
 
-        # Create a Node instance        
+        # Create a Node instance
         self.node = AI_Node(
             in_name=self.name,
             in_node_id=self.node_id,
@@ -29,7 +30,7 @@ class TestNode(unittest.TestCase):
             in_priority=self.priority,
             in_status=self.status,
             in_purpose=self.purpose,
-            in_task = self.task,
+            in_task=self.task,
         )
 
     def test_initialization(self):
@@ -69,7 +70,9 @@ class TestNode(unittest.TestCase):
         self.assertEqual(self.node.status, new_status)
 
         # Check that the logger was called with the correct message
-        Logger.log_node_event.assert_called_with(self.name, f"Status updated to {new_status}")
+        Logger.log_node_event.assert_called_with(
+            self.name, f"Status updated to {new_status}"
+        )
 
     def test_str_representation(self):
         """
@@ -87,6 +90,7 @@ class TestNode(unittest.TestCase):
 
         # Assert both instances are the same
         self.assertIs(logger1, logger2)
+
 
 if __name__ == "__main__":
     unittest.main()

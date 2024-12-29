@@ -3,12 +3,14 @@ import time
 
 workflow_timer = {"start_time": None, "end_time": None}
 
+
 def start_timer():
     """
     Start the workflow timer.
     """
     workflow_timer["start_time"] = time.time()
     print("Workflow timer started.")
+
 
 def stop_timer():
     """

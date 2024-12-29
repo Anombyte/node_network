@@ -16,7 +16,7 @@ def sample_node():
         in_priority=1,
         in_status="active",
         in_purpose="Test",
-        in_task="Initial Task"
+        in_task="Initial Task",
     )
 
 
@@ -35,7 +35,7 @@ def test_node_initialization_with_uuid(mock_get_logger):
         in_priority=5,
         in_status="active",
         in_purpose="Testing",
-        in_task="Test Task"
+        in_task="Test Task",
     )
 
     # Assertions
@@ -44,10 +44,11 @@ def test_node_initialization_with_uuid(mock_get_logger):
     assert node.status == "active"
     assert node.priority == 5
 
+
 def test_node_initialization_with_provided_id():
     """
     Test that the node uses a provided ID instead of generating a new UUID.
-    """    
+    """
     provided_id = "12345"
     node = AI_Node(
         in_name="Node1",
@@ -56,13 +57,14 @@ def test_node_initialization_with_provided_id():
         in_priority=2,
         in_status="inactive",
         in_purpose="Testing",
-        in_task="Test Task"
+        in_task="Test Task",
     )
 
     # Assertions
     assert node.node_id == provided_id
     assert node.status == "inactive"
     assert node.priority == 2
+
 
 def test_get_details(sample_node):
     """
@@ -79,6 +81,7 @@ def test_get_details(sample_node):
     assert details["purpose"] == sample_node.purpose
     assert details["task"] == sample_node.task
 
+
 def test_set_status(sample_node):
     """
     Test that the set_status method updates the status correctly.
@@ -86,6 +89,7 @@ def test_set_status(sample_node):
 
     sample_node.set_status("inactive")
     assert sample_node.status == "inactive"
+
 
 def test_str_representation(sample_node):
     """
@@ -101,6 +105,7 @@ def test_str_representation(sample_node):
     assert f"Purpose={sample_node.purpose}" in result
     assert f"Task={sample_node.task}" in result
 
+
 def test_set_task(sample_node):
     """
     Test that the set_task method updates the task correctly.
@@ -109,6 +114,7 @@ def test_set_task(sample_node):
     new_task = "Updated Task"
     sample_node.set_task(new_task)
     assert sample_node.task == new_task
+
 
 def test_edge_case_empty_description():
     """
@@ -121,9 +127,10 @@ def test_edge_case_empty_description():
         in_priority=1,
         in_status="active",
         in_purpose="Edge Test",
-        in_task="Test Task"
+        in_task="Test Task",
     )
     assert node.description == ""
+
 
 def test_edge_case_invalid_priority():
     """
@@ -137,8 +144,9 @@ def test_edge_case_invalid_priority():
             in_priority=-5,  # Invalid priority
             in_status="active",
             in_purpose="Testing",
-            in_task="Test Task"
+            in_task="Test Task",
         )
+
 
 def test_edge_case_null_task():
     """
@@ -151,27 +159,31 @@ def test_edge_case_null_task():
         in_priority=1,
         in_status="active",
         in_purpose="Testing",
-        in_task=None  # Null task
+        in_task=None,  # Null task
     )
     assert node.task is None
+
 
 def test_process_task_mock(sample_node):
     """
     Test the behavior of the process_task method when mocked.
     """
-    with patch.object(AI_Node, 'process_task', return_value="Mocked task processed") as mock_method:
+    with patch.object(
+        AI_Node, "process_task", return_value="Mocked task processed"
+    ) as mock_method:
         result = sample_node.process_task()
 
         # Assertions
         assert result == "Mocked task processed"
         mock_method.assert_called_once()  # Ensure the method was called
 
+
 def test_set_priority():
     """
     Test that set_priority logs an error and raises ValueError for invalid priority.
     Test that set_priority also deals with valid priorities.
     """
-    with patch.object(AI_Node, 'log_error') as mock_log_error:
+    with patch.object(AI_Node, "log_error") as mock_log_error:
         node = AI_Node(
             in_name="TestNode",
             in_node_id=None,
@@ -179,22 +191,28 @@ def test_set_priority():
             in_priority=1,
             in_status="active",
             in_purpose="Testing",
-            in_task="Task"
+            in_task="Task",
         )
 
         # Invalid values
         # Assert that ValueError is raised
-        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+        with pytest.raises(
+            ValueError, match="Priority must be greater than or equal to 1."
+        ):
             node.set_priority(-5)  # Invalid priority
-        # Assert that log_error was called with the correct message
+            # Assert that log_error was called with the correct message
             mock_log_error.assert_called_once_with("Priority must be >= 1")
-        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+        with pytest.raises(
+            ValueError, match="Priority must be greater than or equal to 1."
+        ):
             node.set_priority(0)  # Invalid priority
             mock_log_error.assert_called_once_with("Priority must be >= 1")
-        with pytest.raises(ValueError, match="Priority must be greater than or equal to 1."):
+        with pytest.raises(
+            ValueError, match="Priority must be greater than or equal to 1."
+        ):
             node.set_priority(-100000000)  # Invalid priority
             mock_log_error.assert_called_once_with("Priority must be >= 1")
-        
+
         # Valid values
         node.set_priority(10)
         assert node.priority == 10
@@ -202,4 +220,3 @@ def test_set_priority():
         assert node.priority == 1
         node.set_priority(100000)
         assert node.priority == 100000
-

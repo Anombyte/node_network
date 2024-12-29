@@ -1,9 +1,19 @@
 from shared.logger_manager import LoggerMixin
-    
+
 import uuid  # Import uuid for generating unique identifiers
 
+
 class AI_Node(LoggerMixin):
-    def __init__(self, in_name, in_node_id, in_description, in_priority, in_status, in_purpose, in_task):
+    def __init__(
+        self,
+        in_name,
+        in_node_id,
+        in_description,
+        in_priority,
+        in_status,
+        in_purpose,
+        in_task,
+    ):
         """
         Constructor for the Node class.
 
@@ -15,11 +25,13 @@ class AI_Node(LoggerMixin):
         - in_purpose (str): Purpose or role of the node.
         """
 
-        super().__init__() # Initialize loggers from LoggerMixin which include 'default', 'debugger' and 'error_logger'
+        super().__init__()  # Initialize loggers from LoggerMixin which include 'default', 'debugger' and 'error_logger'
 
         # Assign class attributes
         self.name = in_name
-        self.node_id = in_node_id or str(uuid.uuid4())  # Use provided ID or generate a UUID
+        self.node_id = in_node_id or str(
+            uuid.uuid4()
+        )  # Use provided ID or generate a UUID
         self.description = in_description
         self.status = in_status
         self.purpose = in_purpose
@@ -33,14 +45,18 @@ class AI_Node(LoggerMixin):
         Returns:
         A dictionary containing the node's attributes: node_id, description, priority, status, and purpose.
         """
-        self.log_node_event(self.name, self.node_id, f"Details retrieved...\n Description: {self.description}\n Priority: {self.priority}\n Purpose: {self.purpose} Current Task: {self.task}")
+        self.log_node_event(
+            self.name,
+            self.node_id,
+            f"Details retrieved...\n Description: {self.description}\n Priority: {self.priority}\n Purpose: {self.purpose} Current Task: {self.task}",
+        )
         return {
             "node_id": self.node_id,
             "description": self.description,
             "priority": self.priority,
             "status": self.status,
             "purpose": self.purpose,
-            "task": self.task, #TODO make task an Object
+            "task": self.task,  # TODO make task an Object
         }
 
     def set_status(self, in_status):
@@ -54,7 +70,7 @@ class AI_Node(LoggerMixin):
         """
         # Update the node's status.
         self.status = in_status
-        
+
         # Log the status update.
         self.log_node_event(self.name, self.node_id, f"Status updated to {self.status}")
 
@@ -66,13 +82,13 @@ class AI_Node(LoggerMixin):
         A string showing the node ID, priority, status, and purpose.
         """
         outString = f"Node({self.node_id}, Priority={self.priority}, Status={self.status}, Purpose={self.purpose}, Task={self.task})"
-        self.log_node_event(self.name,self.node_id,outString)
+        self.log_node_event(self.name, self.node_id, outString)
         return outString
-    
+
     def set_task(self, in_task):
-        #TODO validate task is a task that this node can process
+        # TODO validate task is a task that this node can process
         self.task = in_task
-    
+
     def set_priority(self, in_priority):
         # Validate and assign priority
         if in_priority >= 1:
@@ -80,7 +96,7 @@ class AI_Node(LoggerMixin):
         else:
             self.log_error("Priority must be >= 1")
             raise ValueError("Priority must be greater than or equal to 1.")
-        
+
     def process_task(self):
         """
         Stub for processing the assigned task.
@@ -88,5 +104,7 @@ class AI_Node(LoggerMixin):
         Returns:
             str: Placeholder result indicating task is processed.
         """
-        self.log_node_event(f"Processing task for Node {self.name} (ID: {self.node_id})")
+        self.log_node_event(
+            f"Processing task for Node {self.name} (ID: {self.node_id})"
+        )
         return "Task processed"

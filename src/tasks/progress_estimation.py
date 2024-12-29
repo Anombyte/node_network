@@ -6,6 +6,7 @@ from logger_manager import logger, log_event, log_error, log_task_event
 # Global progress bar
 progress_bar = None
 
+
 def initialize_progress_bar(total_tasks=None):
     """
     Initialize a progress bar.
@@ -14,8 +15,9 @@ def initialize_progress_bar(total_tasks=None):
     global progress_bar
     if total_tasks is None:
         total_tasks = state.get("total_tasks", 0)
-    
+
     progress_bar = tqdm(total=total_tasks, desc="Workflow Progress", unit="task")
+
 
 def update_progress_bar():
     """
@@ -23,15 +25,19 @@ def update_progress_bar():
     """
     global progress_bar
     if progress_bar:
-        completed_tasks = sum(1 for node in state["nodes"].values() if node.get("status") == "Completed")
+        completed_tasks = sum(
+            1 for node in state["nodes"].values() if node.get("status") == "Completed"
+        )
         progress_bar.n = completed_tasks  # Update progress bar position
         progress_bar.refresh()
+
 
 def finalize_progress_bar():
     global progress_bar
     if progress_bar is not None:
         progress_bar.close()
         progress_bar = None
+
 
 def progress_estimation_node():
     """

@@ -7,7 +7,7 @@ state = {
     "progress": 0,
     "total_tasks": 1,  # Start with 1 for now
     "completed_tasks": 0,
-    "nodes": {}
+    "nodes": {},
 }
 
 # Initialize the progress bar
@@ -15,13 +15,16 @@ progress_bar = tqdm(total=state["total_tasks"], desc="Workflow Progress", unit="
 
 state_lock = RLock()
 
+
 def thread_safe(func):
     """
     Decorator to make state-modifying functions thread-safe.
     """
+
     def wrapper(*args, **kwargs):
         with state_lock:
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -39,7 +42,9 @@ def register_node(node_name, dependencies=None, priority=0):
             "priority": priority,
         }
         state["total_tasks"] = len(state["nodes"])  # Update total tasks dynamically
-        log_event(f"Node registered: {node_name}, Priority: {priority}, Dependencies: {dependencies}")
+        log_event(
+            f"Node registered: {node_name}, Priority: {priority}, Dependencies: {dependencies}"
+        )
 
 
 @thread_safe
@@ -62,7 +67,9 @@ def are_dependencies_completed(node_name):
     dependencies = state["nodes"][node_name].get("dependencies", [])
     for dependency in dependencies:
         status = state["nodes"][dependency]["status"]
-        log_node_event(node_name, f"Checking dependency {dependency}: Status = {status}")
+        log_node_event(
+            node_name, f"Checking dependency {dependency}: Status = {status}"
+        )
         if status != "Completed":
             return False
     return True
@@ -99,10 +106,13 @@ def increment_completed_tasks():
     state["completed_tasks"] += 1
     state["progress"] = int((state["completed_tasks"] / state["total_tasks"]) * 100)
     progress_bar.update(1)
-    log_node_event(f"Completed tasks: {state['completed_tasks']}/{state['total_tasks']} | Progress: {state['progress']}%")
+    log_node_event(
+        f"Completed tasks: {state['completed_tasks']}/{state['total_tasks']} | Progress: {state['progress']}%"
+    )
 
-#TODO finish fixing text cases (dependencies and one other I forgot)
-#Also need to understand how to create this program programatically from a gpt rather than just pasting code it gives me into this.
+
+# TODO finish fixing text cases (dependencies and one other I forgot)
+# Also need to understand how to create this program programatically from a gpt rather than just pasting code it gives me into this.
 @thread_safe
 def update_progress():
     """
@@ -111,10 +121,9 @@ def update_progress():
     state["completed_tasks"] = sum(
         1 for node in state["nodes"].values() if node["status"] == "Completed"
     )
-    state["progress"] = int(
-        (state["completed_tasks"] / state["total_tasks"]) * 100
-    )
+    state["progress"] = int((state["completed_tasks"] / state["total_tasks"]) * 100)
     log_node_event(f"Progress updated: {state['progress']}%")
+
 
 @thread_safe
 def initialize_node(node_name):
@@ -127,7 +136,7 @@ def initialize_node(node_name):
             "dependencies": [],
             "retries": 0,
             "output": None,
-            "priority": 0
+            "priority": 0,
         }
         state["total_tasks"] += 1
         log_node_event(node_name, "Node initialized.")

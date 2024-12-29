@@ -8,6 +8,7 @@ from logger_manager import logger, log_event, log_error, log_task_event
 
 from logger_manager import logger, log_task_event, log_error
 
+
 def execute_in_parallel(tasks, state):
     logger.info("Starting parallel execution of tasks.")
     threads = []
@@ -33,14 +34,16 @@ def execute_in_parallel(tasks, state):
     for thread in threads:
         thread.join()
 
-    remaining_tasks = [(task, args) for task, args in tasks if state["nodes"][args[1]]["status"] != "Completed"]
+    remaining_tasks = [
+        (task, args)
+        for task, args in tasks
+        if state["nodes"][args[1]]["status"] != "Completed"
+    ]
     if remaining_tasks:
         logger.info("Some tasks remain incomplete. Re-executing remaining tasks.")
         execute_in_parallel(remaining_tasks, state)
     else:
         logger.info("All tasks have been executed successfully.")
-
-
 
 
 def task_wrapper(task, args, state):
@@ -50,11 +53,10 @@ def task_wrapper(task, args, state):
         output = task(*args)  # Call the actual task function
         state["nodes"][node_name]["status"] = "Completed"
         state["nodes"][node_name]["output"] = output
-        logger.info(f"Task {node_name}: Execution completed successfully. Output: {output}")
+        logger.info(
+            f"Task {node_name}: Execution completed successfully. Output: {output}"
+        )
     except Exception as e:
         logger.error(f"Task {node_name}: Execution failed with error: {e}")
         state["nodes"][node_name]["status"] = "Error"
         state["nodes"][node_name]["output"] = None
-
-
-

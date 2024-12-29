@@ -3,4 +3,5 @@ flake8
 tqdm
 openai
 requests
+black
 
