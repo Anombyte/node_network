@@ -1,6 +1,6 @@
 from threading import RLock
 from tqdm import tqdm
-from logger_utils import logger, log_event, log_error, log_task_event, log_node_event
+from logger_manager import logger, log_event, log_error, log_task_event, log_node_event
 
 # State dictionary and lock for thread-safe access
 state = {

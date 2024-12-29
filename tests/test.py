@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from logger_utils import Logger  # Mock the Logger
+from logger_manager import Logger  # Mock the Logger
 from shared.AI_Node import AI_Node  # Import the Node class
 
 class TestNode(unittest.TestCase):

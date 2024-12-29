@@ -1,109 +1,84 @@
-import logging
-from io import StringIO
+from unittest.mock import patch, MagicMock
 import pytest
-from shared.logger_utils import configure_logger, log_event, log_error, log_task_event, log_node_event
+from shared.logger_manager import LoggerMixin
 
 @pytest.fixture
-def log_stream():
+def logger_mixin():
     """
-    A pytest fixture to provide a logger and a StringIO stream to capture log outputs.
+    A fixture to create an instance of LoggerMixin for testing.
     """
-    logger_name = "TestLogger"
-    log_stream = StringIO()
+    return LoggerMixin()
 
-    # Configure the logger for testing
-    logger = configure_logger(name=logger_name, level=logging.DEBUG)
-    for handler in logger.handlers:
-        logger.removeHandler(handler)  # Ensure no duplicate handlers
-
-    # Add a stream handler to capture log output
-    stream_handler = logging.StreamHandler(log_stream)
-    formatter = logging.Formatter(
-        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-
-    return logger_name, log_stream
-
-
-def test_configure_logger():
+@patch("logging.getLogger")  # Mock the logger retrieval
+def test_logger_initialization(mock_get_logger):
     """
-    Test that the logger is configured correctly.
+    Test that LoggerMixin initializes the correct loggers.
     """
-    logger = configure_logger(name="MyLogger", level=logging.WARNING)
-    assert logger.name == "MyLogger"
-    assert logger.level == logging.WARNING
+    mock_logger = MagicMock()
+    mock_get_logger.return_value = mock_logger
 
+    mixin = LoggerMixin()
+    
+    # Assert that the loggers were retrieved with the correct names
+    mock_get_logger.assert_any_call("default")
+    mock_get_logger.assert_any_call("debugger")
+    mock_get_logger.assert_any_call("error_logger")
+    assert mixin.logger == mock_logger
+    assert mixin.debugger == mock_logger
+    assert mixin.error_logger == mock_logger
 
-def test_log_event(log_stream):
+@patch("logging.getLogger")
+def test_log_info(mock_get_logger):
     """
-    Test logging an informational event.
+    Test that log_info calls the logger's info method with the correct message.
     """
-    logger_name, stream = log_stream
-    log_event("This is a test event.", logger_name)
-    stream.seek(0)
-    log_output = stream.read()
-    assert "INFO" in log_output
-    assert "This is a test event." in log_output
+    mock_logger = MagicMock()
+    mock_get_logger.return_value = mock_logger
 
+    mixin = LoggerMixin()
+    mixin.log_info("This is an info message.")
 
-def test_log_error(log_stream):
-    """
-    Test logging an error event.
-    """
-    logger_name, stream = log_stream
-    log_error("This is a test error.", logger_name)
-    stream.seek(0)
-    log_output = stream.read()
-    assert "ERROR" in log_output
-    assert "This is a test error." in log_output
+    # Verify that the logger.info method was called once with the correct message
+    mock_logger.info.assert_called_once_with("This is an info message.")
 
+@patch("logging.getLogger")
+def test_log_error(mock_get_logger):
+    """
+    Test that log_error calls the error_logger's error method with the correct message.
+    """
+    mock_logger = MagicMock()
+    mock_get_logger.return_value = mock_logger
 
-def test_log_task_event_with_id(log_stream):
-    """
-    Test logging a task-specific event with an ID.
-    """
-    logger_name, stream = log_stream
-    log_task_event(task_name="Task1", in_id=42, in_logger_name=logger_name, in_message="Task completed.")
-    stream.seek(0)
-    log_output = stream.read()
-    assert "INFO" in log_output
-    assert "[Node-Task1 - 42] Task completed." in log_output
+    mixin = LoggerMixin()
+    mixin.log_error("This is an error message.")
 
+    # Verify that the error_logger.error method was called once with the correct message
+    mock_logger.error.assert_called_once_with("This is an error message.")
 
-def test_log_task_event_without_id(log_stream):
+@patch("logging.getLogger")
+def test_log_task_event(mock_get_logger):
     """
-    Test logging a task-specific event without an ID.
+    Test that log_task_event logs the correct task-specific message.
     """
-    logger_name, stream = log_stream
-    log_task_event(task_name="Task1", in_logger_name=logger_name, in_message="Task started.")
-    stream.seek(0)
-    log_output = stream.read()
-    assert "INFO" in log_output
-    assert "[Node-Task1 - None] Task started." in log_output
+    mock_logger = MagicMock()
+    mock_get_logger.return_value = mock_logger
 
+    mixin = LoggerMixin()
+    mixin.log_task_event(task_name="ExampleTask", in_id=42, message="Task started.")
 
-def test_log_node_event_with_id(log_stream):
-    """
-    Test logging a node-specific event with an ID.
-    """
-    logger_name, stream = log_stream
-    log_node_event(node_name="Node1", in_id=99, in_logger_name=logger_name, in_message="Node initialized.")
-    stream.seek(0)
-    log_output = stream.read()
-    assert "INFO" in log_output
-    assert "[Node-Node1 - 99] Node initialized." in log_output
+    # Verify that the logger.info method was called with the formatted message
+    mock_logger.info.assert_called_once_with("[Task-ExampleTask - 42] Task started.")
 
+@patch("logging.getLogger")
+def test_log_node_event(mock_get_logger):
+    """
+    Test that log_node_event logs the correct node-specific message.
+    """
+    mock_logger = MagicMock()
+    mock_get_logger.return_value = mock_logger
 
-def test_log_node_event_without_id(log_stream):
-    """
-    Test logging a node-specific event without an ID.
-    """
-    logger_name, stream = log_stream
-    log_node_event(node_name="Node1", in_logger_name=logger_name, in_message="Node shutdown.")
-    stream.seek(0)
-    log_output = stream.read()
-    assert "INFO" in log_output
-    assert "[Node-Node1 - None] Node shutdown." in log_output
+    mixin = LoggerMixin()
+    mixin.log_node_event(node_name="ExampleNode", in_id=99, message="Node initialized.")
+
+    # Verify that the logger.info method was called with the formatted message
+    mock_logger.info.assert_called_once_with("[Node-ExampleNode - 99] Node initialized.")
