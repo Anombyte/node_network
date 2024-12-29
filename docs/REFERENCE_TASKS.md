@@ -1,4 +1,4 @@
-# Reference Tasks: Collaborative AI Node Network
+# Reference Tasks/Roadmap: Collaborative AI Node Network
 
 This file outlines all detailed low-level tasks for building the MVP, and beyond. Use it as a quick reference to track progress and revisit specific implementation steps if needed.
 
