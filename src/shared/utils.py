@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def get_current_timestamp(self):
+def get_current_timestamp():
     """
     Generates the current timestamp.
 

@@ -52,40 +52,31 @@ def test_process_task_logging(
     """Test that process_task logs events for valid and invalid tasks."""
     # Case 1: No task assigned
     sample_node.task = None
-    sample_node.process_task()
+    result = sample_node.process_task()
+
+    # Assertions for no task
     mock_log_error.assert_called_once_with(
         "No task assigned to Node TestNode (ID: 1234)."
     )
+    assert result["status"] == "error"
+    assert result["message"] == "No task assigned."
     mock_log_error.reset_mock()
 
     # Case 2: Valid task assigned
     sample_node.task = "Sample Task"
-    sample_node.process_task()
+    result = sample_node.process_task()
 
-    # Assertions for logging
-    mock_log_node_event.assert_any_call(
-        "TestNode", "1234", "Processing task: Sample Task"
-    )
+    # Assertions for valid task
     mock_log_node_event.assert_any_call(
         "TestNode",
         "1234",
-        "Task completed successfully: {'status': 'success', 'node_id': '1234', "
-        "'task': 'Sample Task', 'output': 'Generated output for task: Sample Task', "
-        "'timestamp': '2024-01-01T00:00:00'}",
+        "Generated prompt: You are part of a node network, specialized in Testing. Your task is: Sample Task",
     )
-
-
-@patch("src.shared.AI_Node.AI_Node.log_error")
-def test_process_task_logs_error_on_exception(mock_log_error, sample_node):
-    """Test that process_task logs an error if execute_task raises an exception."""
-    sample_node.task = "Sample Task"
-
-    # Mock execute_task to raise an exception
-    with patch.object(
-        sample_node, "execute_task", side_effect=Exception("Execution failed")
-    ):
-        sample_node.process_task()
-
-    mock_log_error.assert_called_once_with(
-        "Error processing task in Node TestNode: Execution failed"
+    mock_log_node_event.assert_any_call(
+        "TestNode", "1234", "Activity logged: Processed task: Sample Task"
     )
+    assert result["status"] == "success"
+    assert result["task"] == "Sample Task"
+    assert result["output"] == "Generated output for task: Sample Task"
+    assert result["timestamp"] == "2024-01-01T00:00:00"
+

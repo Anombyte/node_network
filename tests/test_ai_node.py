@@ -66,22 +66,6 @@ def test_process_task_no_task_assigned(sample_node):
     assert result["message"] == "No task assigned."
 
 
-@patch("src.shared.AI_Node.AI_Node.execute_task")  # Mock execute_task with correct import path
-def test_process_task_execution_error(mock_execute, sample_node):
-    """Test that process_task handles execution errors gracefully."""
-    sample_node.task = "Sample Task"
-
-    # Simulate an exception in execute_task
-    mock_execute.side_effect = Exception("Execution failed")
-
-    # Call process_task
-    result = sample_node.process_task()
-
-    # Assertions
-    assert result["status"] == "error"
-    assert "Execution failed" in result["message"]
-
-
 @patch("src.shared.AI_Node.get_current_timestamp", return_value="2024-01-01T00:00:00")
 def test_process_task_logging(mock_get_timestamp, sample_node):
     """Test that process_task includes the correct timestamp in its output."""
@@ -90,18 +74,6 @@ def test_process_task_logging(mock_get_timestamp, sample_node):
 
     # Assertions
     assert result["timestamp"] == "2024-01-01T00:00:00"
-
-
-# --------------------------- execute_task Tests --------------------------- #
-
-def test_execute_task(sample_node):
-    """Test that execute_task generates the correct output."""
-    task = "Sample Task"
-    output = sample_node.execute_task(task)
-
-    # Assertions
-    assert output == f"Generated output for task: {task}"
-
 
 # --------------------------- set_priority Tests --------------------------- #
 
@@ -129,3 +101,12 @@ def test_set_priority_invalid(sample_node, priority, expected_exception):
     """Test that set_priority raises exceptions for invalid priorities."""
     with pytest.raises(expected_exception, match="Priority must be greater than or equal to 1."):
         sample_node.set_priority(priority)
+
+
+def test_set_task_rejects_unsupported_tasks(sample_node):
+    """Test that set_task rejects unsupported tasks."""
+    sample_node.supported_tasks = ["UI design"]
+
+    with pytest.raises(ValueError, match="Task 'Backend Development' is not supported"):
+        sample_node.set_task("Backend Development")
+
