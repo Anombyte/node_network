@@ -28,12 +28,6 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          
-      - name: Debug PYTHONPATH
-        run: |
-          echo "PYTHONPATH: $PYTHONPATH"
-          source venv/bin/activate
-          python -c "import sys; print('\n'.join(sys.path))"
 
       - name: Run Linting (Flake8)
         run: |
