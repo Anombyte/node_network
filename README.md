@@ -12,15 +12,16 @@ This project is a dynamic, reusable Python application that connects AI models (
 ## **Setup Instructions**
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/yourproject.git
+   git clone https://github.com/hbruinsma/node_network.git
    pip install -r requirements.txt
    python main.py
 
 ## **Roadmap**
-[ROADMAP.md](https://github.com/hbruinsma/node_network/blob/main/ROADMAP.md)
+To view a comprehensive explanation of my goals for this project, and for the future, visit [ROADMAP.md](https://github.com/hbruinsma/node_network/tree/main/docs/portfolio/ROADMAP.md).
+
 
 ## **Portfolio**
-Explore my coding journey and progress in the [portfolio folder](https://github.com/hbruinsma/node_network/blob/main/portfolio/)
+Explore my coding journey and progress in the [portfolio folder](https://github.com/hbruinsma/node_network/tree/main/docs/portfolio)
 
 ## **Contributions**
-Contributions are welcome! Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
+Contributions are welcome! Please refer to the [CONTRIBUTING.md](https://github.com/hbruinsma/node_network/blob/main/docs/Contributing.md) guide to get started.
