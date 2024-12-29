@@ -1,5 +1,5 @@
 from shared.logger_manager import LoggerMixin
-
+from src.shared.utils import get_current_timestamp
 import uuid  # Import uuid for generating unique identifiers
 
 
@@ -94,18 +94,60 @@ class AI_Node(LoggerMixin):
         # Validate and assign priority
         if in_priority >= 1:
             self.priority = in_priority
+            # Log the priority update
+            self.log_node_event(self.name, self.node_id, f"Priority updated to {self.priority}")
         else:
             self.log_error("Priority must be >= 1")
             raise ValueError("Priority must be greater than or equal to 1.")
 
     def process_task(self):
         """
-        Stub for processing the assigned task.
+        Processes the assigned task using the node's expertise.
 
         Returns:
-            str: Placeholder result indicating task is processed.
+            dict: A structured result with task details and the generated output.
         """
-        self.log_node_event(
-            f"Processing task for Node {self.name} (ID: {self.node_id})"
-        )
-        return "Task processed"
+        if not self.task:
+            self.log_error(
+                f"No task assigned to Node {self.name} (ID: {self.node_id})."
+            )
+
+            # can handle failure without crashing
+            return {"status": "error", "message": "No task assigned."}
+
+        self.log_node_event(self.name, self.node_id, f"Processing task: {self.task}")
+
+        # Example processing logic - TODO: replace this with actual AI/model logic
+        try:
+            output = self.execute_task(self.task)
+
+            # Generate a structured response
+            result = {
+                "status": "success",
+                "node_id": self.node_id,
+                "task": self.task,
+                "output": output,
+                "timestamp": get_current_timestamp(self),
+            }
+
+            # Log success
+            self.log_node_event(self.name, self.node_id, f"Task completed successfully: {result}")
+            return result
+
+        except Exception as e:
+            # Log failure and return error
+            self.log_error(f"Error processing task in Node {self.name}: {e}")
+            return {"status": "error", "message": str(e)}
+        
+    def execute_task(self, task):
+        """
+        Executes the core functionality of the node based on its expertise.
+
+        Parameters:
+            task (str): The task instructions.
+
+        Returns:
+            str: The generated output.
+        """
+        # Example: Generate a response (replace with domain-specific logic)
+        return f"Generated output for task: {task}"

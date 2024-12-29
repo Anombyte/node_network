@@ -1,92 +1,91 @@
-from unittest.mock import patch, MagicMock
 import pytest
-from src.shared.logger_manager import LoggerMixin
+from unittest.mock import patch
+from src.shared.AI_Node import AI_Node
 
 
 @pytest.fixture
-def logger_mixin():
-    """
-    A fixture to create an instance of LoggerMixin for testing.
-    """
-    return LoggerMixin()
+def sample_node():
+    """Fixture to provide a sample AI_Node instance."""
+    return AI_Node(
+        in_name="TestNode",
+        in_node_id="1234",
+        in_description="Sample Node for Tests",
+        in_priority=1,
+        in_status="active",
+        in_purpose="Testing",
+        in_task=None,
+    )
 
 
-@patch("logging.getLogger")  # Mock the logger retrieval
-def test_logger_initialization(mock_get_logger):
-    """
-    Test that LoggerMixin initializes the correct loggers.
-    """
-    mock_logger = MagicMock()
-    mock_get_logger.return_value = mock_logger
+# --------------------------- AI_Node Logging Tests --------------------------- #
 
-    mixin = LoggerMixin()
-
-    # Assert that the loggers were retrieved with the correct names
-    mock_get_logger.assert_any_call("default")
-    mock_get_logger.assert_any_call("debugger")
-    mock_get_logger.assert_any_call("error_logger")
-    assert mixin.logger == mock_logger
-    assert mixin.debugger == mock_logger
-    assert mixin.error_logger == mock_logger
+@patch("src.shared.AI_Node.AI_Node.log_node_event")
+def test_set_priority_logs(mock_log_node_event, sample_node):
+    """Test that set_priority logs the correct message."""
+    sample_node.set_priority(10)
+    mock_log_node_event.assert_called_once_with(
+        "TestNode", "1234", "Priority updated to 10"
+    )
 
 
-@patch("logging.getLogger")
-def test_log_info(mock_get_logger):
-    """
-    Test that log_info calls the logger's info method with the correct message.
-    """
-    mock_logger = MagicMock()
-    mock_get_logger.return_value = mock_logger
-
-    mixin = LoggerMixin()
-    mixin.log_info("This is an info message.")
-
-    # Verify that the logger.info method was called once with the correct message
-    mock_logger.info.assert_called_once_with("This is an info message.")
-
-
-@patch("logging.getLogger")
-def test_log_error(mock_get_logger):
-    """
-    Test that log_error calls the error_logger's error method with the correct message.
-    """
-    mock_logger = MagicMock()
-    mock_get_logger.return_value = mock_logger
-
-    mixin = LoggerMixin()
-    mixin.log_error("This is an error message.")
-
-    # Verify that the error_logger.error method was called once with the correct message
-    mock_logger.error.assert_called_once_with("This is an error message.")
+@patch("src.shared.AI_Node.AI_Node.log_error")
+@pytest.mark.parametrize(
+    "priority, expected_message",
+    [
+        (0, "Priority must be >= 1"),
+        (-5, "Priority must be >= 1"),
+    ],
+)
+def test_set_priority_logs_error(mock_log_error, sample_node, priority, expected_message):
+    """Test that set_priority logs an error for invalid priorities."""
+    with pytest.raises(ValueError):
+        sample_node.set_priority(priority)
+    mock_log_error.assert_called_once_with(expected_message)
 
 
-@patch("logging.getLogger")
-def test_log_task_event(mock_get_logger):
-    """
-    Test that log_task_event logs the correct task-specific message.
-    """
-    mock_logger = MagicMock()
-    mock_get_logger.return_value = mock_logger
+@patch("src.shared.AI_Node.get_current_timestamp", return_value="2024-01-01T00:00:00")
+@patch("src.shared.AI_Node.AI_Node.log_node_event")
+@patch("src.shared.AI_Node.AI_Node.log_error")
+def test_process_task_logging(
+    mock_log_error, mock_log_node_event, mock_get_timestamp, sample_node
+):
+    """Test that process_task logs events for valid and invalid tasks."""
+    # Case 1: No task assigned
+    sample_node.task = None
+    sample_node.process_task()
+    mock_log_error.assert_called_once_with(
+        "No task assigned to Node TestNode (ID: 1234)."
+    )
+    mock_log_error.reset_mock()
 
-    mixin = LoggerMixin()
-    mixin.log_task_event(task_name="ExampleTask", in_id=42, message="Task started.")
+    # Case 2: Valid task assigned
+    sample_node.task = "Sample Task"
+    sample_node.process_task()
 
-    # Verify that the logger.info method was called with the formatted message
-    mock_logger.info.assert_called_once_with("[Task-ExampleTask - 42] Task started.")
+    # Assertions for logging
+    mock_log_node_event.assert_any_call(
+        "TestNode", "1234", "Processing task: Sample Task"
+    )
+    mock_log_node_event.assert_any_call(
+        "TestNode",
+        "1234",
+        "Task completed successfully: {'status': 'success', 'node_id': '1234', "
+        "'task': 'Sample Task', 'output': 'Generated output for task: Sample Task', "
+        "'timestamp': '2024-01-01T00:00:00'}",
+    )
 
 
-@patch("logging.getLogger")
-def test_log_node_event(mock_get_logger):
-    """
-    Test that log_node_event logs the correct node-specific message.
-    """
-    mock_logger = MagicMock()
-    mock_get_logger.return_value = mock_logger
+@patch("src.shared.AI_Node.AI_Node.log_error")
+def test_process_task_logs_error_on_exception(mock_log_error, sample_node):
+    """Test that process_task logs an error if execute_task raises an exception."""
+    sample_node.task = "Sample Task"
 
-    mixin = LoggerMixin()
-    mixin.log_node_event(node_name="ExampleNode", in_id=99, message="Node initialized.")
+    # Mock execute_task to raise an exception
+    with patch.object(
+        sample_node, "execute_task", side_effect=Exception("Execution failed")
+    ):
+        sample_node.process_task()
 
-    # Verify that the logger.info method was called with the formatted message
-    mock_logger.info.assert_called_once_with(
-        "[Node-ExampleNode - 99] Node initialized."
+    mock_log_error.assert_called_once_with(
+        "Error processing task in Node TestNode: Execution failed"
     )
