@@ -3,6 +3,8 @@
 ## **Project Purpose**
 To create a collaborative network of AI nodes that adapt dynamically to user preferences and solve complex tasks. This roadmap outlines the steps to build the minimum viable product (MVP) and extend it into a scalable, intelligent system.
 
+It is also a way for me to learn to code with AI, and to create myself a tool which I am passionate about that I can use in my day-to-day life, for almost any task.
+
 ## **Timeline**
 **N/A** - Defined in the Project Dashboard
 
