@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
 import pytest
-from shared.logger_manager import LoggerMixin
+from src.shared.logger_manager import LoggerMixin
 
 
 @pytest.fixture

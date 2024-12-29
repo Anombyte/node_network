@@ -1,7 +1,7 @@
 import pytest
 import uuid
 from unittest.mock import patch, MagicMock
-from shared.AI_Node import AI_Node
+from src.shared.AI_Node import AI_Node
 
 
 @pytest.fixture
