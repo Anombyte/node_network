@@ -1,13 +1,4 @@
-from tasks.progress_estimation import (
-    initialize_progress_bar,
-    finalize_progress_bar,
-    progress_estimation_node,
-)
-from shared.state import state
-from shared.parallel_execution import execute_tasks
-from logger_manager import (
-    configure_logging,
-)
+from src.shared.NodeRegistry import NodeRegistry
 
 
 def main():
@@ -15,21 +6,13 @@ def main():
     Main entry point for running the node network program.
     Configures standard logging behaviour, initializes progress bar, executes tasks, and finalizes progress.
     """
-    configure_logging()
-    initialize_progress_bar()
+    #initialize_progress_bar()
 
     try:
-        # Execute tasks in parallel
-        execute_tasks()
-        # Show final progress estimation
-        progress_estimation_node()
+        node_registry = NodeRegistry
     finally:
-        # Finalize the progress bar
-        finalize_progress_bar()
         print("Workflow completed successfully!")
 
 
 if __name__ == "__main__":
-    # Initialize state
-    state["total_tasks"] = len(state["nodes"])
     main()

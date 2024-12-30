@@ -1,6 +1,8 @@
 import logging
 import logging.config
 
+from src.shared.utils import get_current_timestamp
+
 
 def configure_logging():
     """
@@ -84,7 +86,7 @@ class LoggerMixin:
         Parameters:
         - message (str): The message to log.
         """
-        self.error_logger.error(message)
+        self.error_logger.error(f"Error: {message}")
 
     def log_task_event(self, task_name, in_id=None, message=""):
         """
@@ -120,4 +122,16 @@ class LoggerMixin:
         - message (str): The message to log.
         """
         log_message = f"[Node-{in_name} - {in_id}] {message}"
+        self.debugger.debug(log_message)
+
+    def log_state_transition(self, in_name, from_state, to_state, in_id=None,):
+        """Log state transitions with structured logging."""
+        log_message =  {
+            "event": "state_transition",
+            "from_state": str(from_state),
+            "to_state": str(to_state),
+            "timestamp": get_current_timestamp(),
+            "name": in_name,
+            "ID": in_id
+        }
         self.debugger.debug(log_message)

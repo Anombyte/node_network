@@ -1,142 +1,143 @@
-from threading import RLock
-from tqdm import tqdm
-from logger_manager import logger, log_event, log_error, log_task_event, log_node_event
-
-# State dictionary and lock for thread-safe access
-state = {
-    "progress": 0,
-    "total_tasks": 1,  # Start with 1 for now
-    "completed_tasks": 0,
-    "nodes": {},
-}
-
-# Initialize the progress bar
-progress_bar = tqdm(total=state["total_tasks"], desc="Workflow Progress", unit="task")
-
-state_lock = RLock()
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.shared.StateMachine import StateMachine
 
 
-def thread_safe(func):
-    """
-    Decorator to make state-modifying functions thread-safe.
-    """
+class BaseState:
+    def __init__(self, state_machine: "StateMachine"):
+        self.state_machine = state_machine
 
-    def wrapper(*args, **kwargs):
-        with state_lock:
-            return func(*args, **kwargs)
+    @property
+    def name(self):
+        return self.__class__.__name__.replace("State", "").lower()
 
-    return wrapper
+    def can_transition_to(self, new_state: str) -> bool:
+        """Define valid state transitions."""
+        return True  # Allow all transitions by default
 
+    def can_process_task(self):
+        """Determine if the state allows task processing."""
+        return False  # By default, processing is not allowed in states
 
-@thread_safe
-def register_node(node_name, dependencies=None, priority=0):
-    """
-    Register a new node in the workflow state.
-    """
-    if node_name not in state["nodes"]:
-        state["nodes"][node_name] = {
-            "status": "Not Started",
-            "dependencies": dependencies if dependencies else [],
-            "retries": 0,
-            "output": None,
-            "priority": priority,
-        }
-        state["total_tasks"] = len(state["nodes"])  # Update total tasks dynamically
-        log_event(
-            f"Node registered: {node_name}, Priority: {priority}, Dependencies: {dependencies}"
+    def handle_task(self):
+        """Default behavior for handling tasks in a state."""
+        self.state_machine.node.log_debugger(
+            f"State '{self.name}' does not support task processing."
         )
-
-
-@thread_safe
-def add_dependency(node_name, dependency):
-    """
-    Add a dependency for a specific node.
-    """
-    if node_name not in state["nodes"]:
-        register_node(node_name)
-    if dependency not in state["nodes"][node_name]["dependencies"]:
-        state["nodes"][node_name]["dependencies"].append(dependency)
-        log_node_event(node_name, f"Added dependency: {dependency}")
-
-
-@thread_safe
-def are_dependencies_completed(node_name):
-    """
-    Check if all dependencies for a specific node are completed.
-    """
-    dependencies = state["nodes"][node_name].get("dependencies", [])
-    for dependency in dependencies:
-        status = state["nodes"][dependency]["status"]
-        log_node_event(
-            node_name, f"Checking dependency {dependency}: Status = {status}"
-        )
-        if status != "Completed":
-            return False
-    return True
-
-
-@thread_safe
-def update_node_output(node_name, output):
-    """
-    Store the output of a specific node in the shared state and mark it as completed.
-    """
-    if node_name in state["nodes"]:
-        state["nodes"][node_name]["output"] = output
-        update_node_status(node_name, "Completed")
-        increment_completed_tasks()
-        log_node_event(node_name, f"Output updated. Task marked as completed.")
-
-
-@thread_safe
-def update_node_status(node_name, status):
-    """
-    Update the status of a node and recalculate progress.
-    """
-    if node_name in state["nodes"]:
-        state["nodes"][node_name]["status"] = status
-        log_node_event(node_name, f"Status updated to {status}.")
-        update_progress()
-
-
-@thread_safe
-def increment_completed_tasks():
-    """
-    Increment the count of completed tasks and update the progress bar.
-    """
-    state["completed_tasks"] += 1
-    state["progress"] = int((state["completed_tasks"] / state["total_tasks"]) * 100)
-    progress_bar.update(1)
-    log_node_event(
-        f"Completed tasks: {state['completed_tasks']}/{state['total_tasks']} | Progress: {state['progress']}%"
-    )
-
-
-# TODO finish fixing text cases (dependencies and one other I forgot)
-# Also need to understand how to create this program programatically from a gpt rather than just pasting code it gives me into this.
-@thread_safe
-def update_progress():
-    """
-    Update progress percentage in the state.
-    """
-    state["completed_tasks"] = sum(
-        1 for node in state["nodes"].values() if node["status"] == "Completed"
-    )
-    state["progress"] = int((state["completed_tasks"] / state["total_tasks"]) * 100)
-    log_node_event(f"Progress updated: {state['progress']}%")
-
-
-@thread_safe
-def initialize_node(node_name):
-    """
-    Add a new node to the state with 'Not Started' status.
-    """
-    if node_name not in state["nodes"]:
-        state["nodes"][node_name] = {
-            "status": "Not Started",
-            "dependencies": [],
-            "retries": 0,
-            "output": None,
-            "priority": 0,
+        return {
+            "status": "not_allowed",
+            "message": f"Task processing is not allowed in state '{self.name}'.",
         }
-        state["total_tasks"] += 1
-        log_node_event(node_name, "Node initialized.")
+
+
+class WaitingState(BaseState):
+    def can_transition_to(self, new_state):
+        return new_state in ["ready", "processing", "error", "inactive"]
+
+    def can_process_task(self):
+        """Waiting state does not allow task processing."""
+        return False
+
+    def handle_task(self):
+        """Handle task logic for waiting state."""
+        unresolved_dependencies = [
+            dep for dep in self.state_machine.node.dependencies
+            if not self.state_machine.node.check_dependency(dep)
+        ]
+        if unresolved_dependencies:
+            self.state_machine.node.log_debugger(
+                f"Node is in 'waiting' state due to unresolved dependencies: {unresolved_dependencies}"
+            )
+            return {
+                "status": "waiting",
+                "message": "Dependencies are unresolved.",
+                "unresolved_dependencies": unresolved_dependencies,
+            }
+        # If no dependencies are unresolved, update the state.
+        self.state_machine.update_state()
+        return {"status": "state_updated", "message": "Dependencies resolved. State updated."}
+
+
+class ReadyState(BaseState):
+    def can_transition_to(self, new_state):
+        return new_state in ["waiting", "processing", "error", "inactive"]
+
+    def can_process_task(self):
+        """Ready state allows task processing."""
+        return True
+
+    def handle_task(self):
+        """Handle task logic for ready state."""
+        if not self.state_machine.node.task:
+            self.state_machine.node.log_debugger(
+                f"No task assigned for Node {self.state_machine.node.name} in 'ready' state."
+            )
+            self.state_machine.update_state()
+            return {
+                "status": "no_task",
+                "message": "No task assigned. State re-evaluated.",
+            }
+        # Transition to processing if a task is available.
+        self.state_machine.set_state("processing")
+        return self.state_machine.node.process_task()
+
+
+class ProcessingState(BaseState):
+    def can_transition_to(self, new_state):
+        return new_state in ["waiting", "ready", "error", "inactive"]
+
+    def can_process_task(self):
+        """Processing state allows task processing."""
+        return True
+
+    def handle_task(self):
+        """Handle task processing in processing state."""
+        if not self.state_machine.node.task:
+            self.state_machine.node.log_error(
+                f"No task assigned in 'processing' state for Node {self.state_machine.node.name}."
+            )
+            self.state_machine.set_state("error")
+            return {
+                "status": "error",
+                "message": "Processing state reached without a task. Transitioned to error.",
+            }
+        # Process the task
+        return self.state_machine.node.process_task()
+
+
+class ErrorState(BaseState):
+    def can_transition_to(self, new_state):
+        return new_state in ["waiting", "ready", "inactive"]
+
+    def can_process_task(self):
+        """Error state does not allow task processing."""
+        return False
+
+    def handle_task(self):
+        """Error state should not process tasks."""
+        self.state_machine.node.log_error(
+            f"Cannot process tasks in 'error' state for Node {self.state_machine.node.name}."
+        )
+        return {
+            "status": "error",
+            "message": "Task processing not allowed in error state.",
+        }
+
+
+class InactiveState(BaseState):
+    def can_transition_to(self, new_state):
+        return new_state in ["waiting", "ready", "error"]
+
+    def can_process_task(self):
+        """Inactive state does not allow task processing."""
+        return False
+
+    def handle_task(self):
+        """Inactive state does not process tasks."""
+        self.state_machine.node.log_debugger(
+            f"Node {self.state_machine.node.name} is inactive and cannot process tasks."
+        )
+        return {
+            "status": "inactive",
+            "message": "Node is inactive. Task processing is not allowed.",
+        }
