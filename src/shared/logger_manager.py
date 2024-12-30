@@ -109,3 +109,15 @@ class LoggerMixin:
         """
         log_message = f"[Node-{node_name} - {in_id}] {message}"
         self.logger.info(log_message)
+
+    def log_debugger(self, in_name, in_id=None, message=""):
+        """
+        Log a node-specific event.
+
+        Parameters:
+        - node_name (str): The name of the node.
+        - in_id (optional): An optional node ID.
+        - message (str): The message to log.
+        """
+        log_message = f"[Node-{in_name} - {in_id}] {message}"
+        self.debugger.debug(log_message)

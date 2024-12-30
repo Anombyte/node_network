@@ -27,6 +27,10 @@ class AI_Node(LoggerMixin):
         - in_priority (int): Priority level of the node. Default is 1.
         - in_status (str): Current status of the node. Default is "active".
         - in_purpose (str): Purpose or role of the node.
+        - in_task (str): The current task the node is assigned to do.
+        - in_supported_tasks: A list of tasks the node is able to perform.
+        - in_dependencies = Any other task that must be completebefore this node can begin work on its task.
+        - in_activity_logs =    
         """
 
         super().__init__()  # Initialize loggers from LoggerMixin which include 'default', 'debugger' and 'error_logger'
@@ -48,6 +52,15 @@ class AI_Node(LoggerMixin):
         self.identity_prompt = (
             in_identity_prompt
             or "You are part of a node network, specialized in {purpose}."
+        )
+
+        # Log initialization details
+        self.log_node_event(
+            self.name,
+            self.node_id,
+            f"Node initialized with purpose: {self.purpose}, "
+            f"supported tasks: {self.supported_tasks}, "
+            f"dependencies: {self.dependencies}",
         )
 
     def get_details(self):
@@ -146,13 +159,19 @@ class AI_Node(LoggerMixin):
             self.log_error(f"No task assigned to Node {self.name} (ID: {self.node_id}).")
             return {"status": "error", "message": "No task assigned."}
 
+        # Debug: Log task being processed
+        self.log_debugger(f"Node {self.name} is starting to process task: {self.task}")
+
+
         # Check dependencies
         if self.dependencies:
             unresolved = [dep for dep in self.dependencies if not self.check_dependency(dep)]
             if unresolved:
                 self.log_error(f"Unresolved dependencies for Node {self.name}: {unresolved}")
                 return {"status": "error", "message": "Unresolved dependencies."}
-
+        # Debug: Log resolved dependencies
+        self.log_debugger(f"Node {self.name} resolved dependencies: {self.dependencies}")
+        
         # Generate and log prompt
         prompt = self.generate_task_prompt()
         self.log_node_event(self.name, self.node_id, f"Generated prompt: {prompt}")
