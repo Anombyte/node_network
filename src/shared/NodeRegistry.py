@@ -10,7 +10,11 @@ class NodeRegistry(LoggerMixin):
         """
         Initialize the NodeRegistry.
         """
-        self.nodes: Dict[str, "AI_Node"] = {}  # Properly annotate the type of the nodes dictionary
+        self.nodes: Dict[str, "AI_Node"] = (
+            {}
+        )  # Properly annotate the type of the nodes dictionary
+
+        super().__init__()  # Initialize loggers
 
     def register_node(self, node: "AI_Node") -> None:
         """

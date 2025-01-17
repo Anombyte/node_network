@@ -12,7 +12,9 @@ class GPTNode(AI_Node):
     def process_task(self):
         """Process the task using the GPT API."""
         if not self.task:
-            self.log_error(f"No task assigned to Node {self.name} (ID: {self.node_id}).")
+            self.log_error(
+                f"No task assigned to Node {self.name} (ID: {self.node_id})."
+            )
             return {"status": "error", "message": "No task assigned."}
 
         try:

@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from src.shared.StateMachine import StateMachine
 
@@ -41,7 +42,8 @@ class WaitingState(BaseState):
     def handle_task(self):
         """Handle task logic for waiting state."""
         unresolved_dependencies = [
-            dep for dep in self.state_machine.node.dependencies
+            dep
+            for dep in self.state_machine.node.dependencies
             if not self.state_machine.node.check_dependency(dep)
         ]
         if unresolved_dependencies:
@@ -55,7 +57,10 @@ class WaitingState(BaseState):
             }
         # If no dependencies are unresolved, update the state.
         self.state_machine.update_state()
-        return {"status": "state_updated", "message": "Dependencies resolved. State updated."}
+        return {
+            "status": "state_updated",
+            "message": "Dependencies resolved. State updated.",
+        }
 
 
 class ReadyState(BaseState):

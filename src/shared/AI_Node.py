@@ -1,15 +1,12 @@
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from src.shared.NodeRegistry import NodeRegistry
+from src.shared.NodeRegistry import NodeRegistry
 
 from src.shared.StateMachine import StateMachine
 from src.shared.logger_manager import LoggerMixin
-from src.shared.utils import get_current_timestamp
-import uuid
-
+from src.shared.utils import get_current_timestamp, get_unique_id
 
 
 class AI_Node(LoggerMixin):
+
     def __init__(
         self,
         in_name,
@@ -18,13 +15,13 @@ class AI_Node(LoggerMixin):
         in_priority,
         in_status,
         in_purpose,
+        in_node_registry,
         in_task=None,
         in_supported_tasks=None,
         in_dependencies=None,
         in_activity_logs=None,
         in_identity_prompt=None,
         in_state_machine=None,
-        in_node_registry: "NodeRegistry" = None,  # Use string literal for NodeRegistry
     ):
         """
         Initialize the AI_Node with state management, logging, and task details.
@@ -33,30 +30,26 @@ class AI_Node(LoggerMixin):
 
         # Node attributes
         self.name = in_name
-        self.node_id = in_node_id or str(uuid.uuid4())
+        self.task = in_task
+        self.dependencies = in_dependencies or []
+        self.state_machine = StateMachine()
+
+        self.node_id = in_node_id or get_unique_id()
+        self.node_registry = in_node_registry
+
         self.description = in_description
         self.status = in_status
         self.purpose = in_purpose
-        self.task = in_task
-        self.set_priority(in_priority)
 
         # Additional attributes
         self.supported_tasks = in_supported_tasks or []
-        self.dependencies = in_dependencies or []
         self.activity_logs = in_activity_logs or []
         self.identity_prompt = in_identity_prompt or (
             "You are part of a node network, specialized in {purpose}."
         )
-
-        # Initialize state machine
-        self.state_machine = StateMachine(self)
-
-        # Register this node in the NodeRegistry
-        self.node_registry = in_node_registry
+        self.set_priority(in_priority)
         if self.node_registry:
             self.node_registry.register_node(self)
-
-
         # Log initialization details
         self.log_node_event(
             self.name,
@@ -64,6 +57,15 @@ class AI_Node(LoggerMixin):
             f"Node initialized with purpose: {self.purpose}, "
             f"supported tasks: {self.supported_tasks}, "
             f"dependencies: {self.dependencies}",
+        )
+
+    def update_state(self):
+        """
+        Update the state of the node based on its dependencies and task.
+        """
+        self.state_machine.update_state(
+            dependencies=self.dependencies,
+            task=self.task,
         )
 
     def set_task(self, task):
@@ -93,7 +95,9 @@ class AI_Node(LoggerMixin):
             self.log_error("Priority must be >= 1")
             raise ValueError("Priority must be greater than or equal to 1.")
         self.priority = in_priority
-        self.log_node_event(self.name, self.node_id, f"Priority updated to {self.priority}")
+        self.log_node_event(
+            self.name, self.node_id, f"Priority updated to {self.priority}"
+        )
 
     def process_task(self):
         """
@@ -110,12 +114,14 @@ class AI_Node(LoggerMixin):
             )
             return {
                 "status": "waiting",
-                "message": f"Node is in state '{self.state_machine.current_state}' and cannot process tasks."
+                "message": f"Node is in state '{self.state_machine.current_state}' and cannot process tasks.",
             }
 
         # If the state permits processing, validate and handle the task
         try:
-            self.log_debugger(f"Node {self.name} is starting to process task: {self.task}")
+            self.log_debugger(
+                f"Node {self.name} is starting to process task: {self.task}"
+            )
 
             # Validate dependencies if in a processing-eligible state
             unresolved_dependencies = [
@@ -159,7 +165,9 @@ class AI_Node(LoggerMixin):
         """
         if dependency in self.dependencies:
             self.dependencies.remove(dependency)
-            self.log_node_event(self.name, self.node_id, f"Dependency resolved: {dependency}")
+            self.log_node_event(
+                self.name, self.node_id, f"Dependency resolved: {dependency}"
+            )
             self.state_machine.update_state()
 
     def generate_task_prompt(self):
@@ -168,17 +176,22 @@ class AI_Node(LoggerMixin):
         """
         if not self.task:
             raise ValueError("No task assigned to generate a task prompt.")
-        return self.identity_prompt.format(purpose=self.purpose) + f" Your task is: {self.task}"
+        return (
+            self.identity_prompt.format(purpose=self.purpose)
+            + f" Your task is: {self.task}"
+        )
 
     def log_activity(self, activity, details=None):
         """
         Log an activity with a timestamp.
         """
         timestamp = get_current_timestamp()
-        self.activity_logs.append({"activity": activity, "timestamp": timestamp, "details": details or {}})
+        self.activity_logs.append(
+            {"activity": activity, "timestamp": timestamp, "details": details or {}}
+        )
         self.log_node_event(self.name, self.node_id, f"Activity logged: {activity}")
 
-    def clear_error(self, reason, dependency_id = None):
+    def clear_error(self, reason, dependency_id=None):
         """
         Clears error conditions and attempts recovery if applicable.
         """
@@ -198,9 +211,10 @@ class AI_Node(LoggerMixin):
         """
         Check if all dependencies are resolved.
         """
-        unresolved = [dep for dep in self.dependencies if not self.check_dependency(dep)]
+        unresolved = [
+            dep for dep in self.dependencies if not self.check_dependency(dep)
+        ]
         return len(unresolved) == 0  # Return True if all dependencies are resolved
-
 
     def check_dependency(self, dependency_id):
         """
@@ -218,13 +232,12 @@ class AI_Node(LoggerMixin):
 
         # Check if the node is in the desired state and status
         is_resolved = (
-            node.get_status() == "idle" and
-            node.state_machine.get_state() == "ready"
+            node.get_status() == "idle" and node.state_machine.get_state() == "ready"
         )
-        
+
         if is_resolved:
             return True  # Dependency is resolved if the node meets the criteria
-        
+
         # Log an info message for unresolved dependencies
         self.log_debugger(
             f"Dependency node with ID '{dependency_id}' is not resolved. "
@@ -232,7 +245,6 @@ class AI_Node(LoggerMixin):
         )
         return False  # Dependency is unresolved if the criteria are not met
 
-    
     def get_status(self):
         """
         Returns the current status of the task

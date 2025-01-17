@@ -1,4 +1,6 @@
 {
-    "python.envFile": "${workspaceFolder}/.env"
-  }
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "python.envFile": "${workspaceFolder}/.env",
+    "editor.formatOnSave": true
+}
   
